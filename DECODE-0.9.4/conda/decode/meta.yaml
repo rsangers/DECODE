@@ -1,0 +1,59 @@
+package:
+  name: decode
+  version: "0.9.4"  # do not modify by hand set and sync with bumpversion
+
+source:
+     - path: ../..
+
+build:
+  noarch: python
+  number: 0
+
+requirements:
+  build:
+    - python {{ python }}
+    - setuptools
+
+  host:
+    - python {{ python }}
+    - numpy {{ numpy }}
+
+  run:
+    - python >=3.6,<4
+    - {{ pin_compatible('numpy', max_pin='x.x') }}
+    - pytorch=1.6
+    - torchvision
+    - click
+    - deprecated
+    - h5py
+    - importlib_resources
+    - matplotlib
+    - pandas
+    - pytest
+    - pyyaml
+    - requests
+    - scipy
+    - seaborn=0.10
+    - scikit-image
+    - scikit-learn
+    - spline
+    - tensorboard
+    - tifffile
+    - tqdm
+
+  test:
+    requires:
+      - python >=3.6,<4
+      - pytest
+    commands:
+      - pytest --pyargs decode
+
+about:
+    home: https://rieslab.de
+    # dev_url: github url 
+    # doc_url: doc url
+    # license: GPL-3.0
+    # license_family: GPL
+    # license_file: {{ SRC_DIR }}/LICENSE
+    summary: "High-Density 3D Single-Molecule Localisation Microscopy using Convolutional Neural Networks."
+    description: "Installation must add the respective channels for the dependencies (i.e. PyTorch and the spline package): ```conda install decode -c turagalab -c pytorch -c conda-forge```"

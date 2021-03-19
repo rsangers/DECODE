@@ -1,0 +1,45 @@
+name: decode_cpu
+
+channels:
+  - turagalab
+  - pytorch
+  - conda-forge
+  - defaults
+
+dependencies:
+  # for building (decode and splinepsf)
+  - bump2version
+  - cmake=3.15
+  - ninja
+  - pybind11>=2.4
+
+  # docs
+  - recommonmark  # markdown for sphinx
+  - sphinx
+  - sphinx-autodoc-typehints
+  - sphinx_rtd_theme
+
+  # actual package
+  - python=3.8
+  - pytorch=1.5.1
+  - torchvision
+  - click
+  - deprecated
+  - h5py
+  - line_profiler
+  - matplotlib
+  - pandas
+  - pytest
+  - pyyaml
+  - requests
+  - scipy
+  - seaborn=0.10
+  - scikit-image
+  - scikit-learn
+  - spline
+  - tensorboard
+  - tifffile
+  - tqdm
+
+  # add kernel to jupyter
+  - ipykernel
