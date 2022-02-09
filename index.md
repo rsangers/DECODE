@@ -1,37 +1,34 @@
-## Welcome to GitHub Pages
+# Deep learning enables fast and dense single-molecule localization with high accuracy
+*By Ruben Sangers and Ruben Band*
 
-You can use the [editor on GitHub](https://github.com/rsangers/DECODE/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+In this blog post, we reproduce the results of the paper: "Deep learning enables fast and dense single-molecule localization with high accuracy". Moreover, we generate synthetic data to quantitatively evaluate the performance of DECODE, the model proposed in this paper. Extensive documentation about DECODE, including example notebooks, can be found at https://github.com/TuragaLab/DECODE. 
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+## Introduction
+In the field of microscopy, the goal is to image small scale structures with a resolution as high as possible. An important subfield of this subject is Single Molecule Localization Microscopy (SMLM) in which there is an increasing need for localizing single isolated emitters in a group of emitters with a high density. These emitters are particles with attached fluorophore, which is added such that the particles emit light, which can be caught by a camera for localization. DECODE is a computational tool that can localize single emitters at high density in 3D with highest accuracy for a large range of imaging modalities and conditions (A. Speiser et al., 2020). As explained by the paper, the structure of DECODE can be seen in the figure down below.
 
-### Markdown
+<img src="decode_architecture.png" alt="decode_architecture" width="600"/>
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+The input is a sequence of images, you could also say a video, which depicts the emitted light from the emitters. The network takes three images at a time, which are the current image, the image that was taken before it and the image that was taken after it. First, all three frames are processed through the network individually in the frame analysis. Second, important features are extracted by combining and processing the results of the frame analysis in the temporal context. The output of the network are predictions for nine features. It predicts the detection probability, the x, y and z coordinates, the intensity and the uncertainty of the coordinates and the intensity of the emitters. Furthermore, it also predicts the background noise. From these features, DECODE can create localizations with uncertainties in every direction for a single frame. By combining all the localizations, a rendering can be created and it can be seen how the emitters are moving over time.
 
-```markdown
-Syntax highlighted code block
+To train the model, a lot of data is needed. This data cannot be generated randomly and at a fast pace and therefore artificial input data needs to be created. This can be done as seen in Figure 2.
 
-# Header 1
-## Header 2
-### Header 3
+<img src="generate_data.png" alt="data_generation_diagram" width="600"/>
 
-- Bulleted
-- List
+For each time step, a set of emitter locations with intensities are created, which are called the ground truth emitters. Together with information about the fluorophore, the Point Spread Function (PSF) and the camera settings, an artificial image can be created for every time step.
 
-1. Numbered
-2. List
+## Project direction
+DECODE has outperformed many fitters at competitions on multiple datasets on detection accuracy and localization error. Therefore, this network can be expected to be state-of-the-art. The network is also being improved every day as this blog is written, such that the network becomes more available to the general public. Furthermore, the network is available in Python, Jupyter notebooks and Google Colab notebooks. We have chosen not to reproduce the network as DECODE and its libraries are well-documented already and much work has been done on making the network reproducible already. Therefore, we think that reproducing the code would not add any value. Therefore, we have chosen to add upon the research that has already been done. We will take a look at new data on which we have tested the network and we will quantitatively test the accuracy of the network in situations where the PSF of two emitters overlap in a parameter check.
 
-**Bold** and _Italic_ and `Code` text
+## Experimental setup
+DECODE is written in Python with Pytorch and it consists of a package spanning ten thousands of lines of code. This package contains everything needed for the training, testing and evaluation of the network, such as classes especially made for the plotting and rendering of the images, classes that handle the metrics to evaluate performance, and classes that can simulate images based on camera settings and a PSF. 
 
-[Link](url) and ![Image](src)
-```
+There are multiple ways to interact with this package, depending on the programming experience of a user and the level of depth. First of all, two Python notebooks are available in Google Colab, which give the ease of computing resources provided by Google and give a nice textual interface where a user does not even have to read any code. Secondly, users can download four Python notebooks which can be interacted with using Jupyter Notebooks and which give more insight in the underlying code and data-structures of DECODE. These notebooks guide you through the process of generating emittersets (structures that define, among others, the coordinates and photon intensity of a set of emitters), training a network, fitting a model on an image and deriving evaluation metrics from a fit. Moreover for experienced programmers, it can be useful to install the decode package locally. This allows you to quickly look up the methods used and even make adjustments to the code if necessary. 
 
-For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
+For the project, we want to use the best resources, which can compute results as quickly as possible. Google Colab provides GPUs which have an average performance and suffice for example data. Our own resources were a laptop without a GPU and a desktop with an AMD GPU, which is not compatible with cuda. Luckily, there was a remote desktop available with an NVIDIA GPU which performed better than the GPUs provided by Google. This allowed us to use the Jupyter notebooks locally on the remote desktop to run the experiments.
 
-### Jekyll Themes
+## Biological data
+We have investigated the performance of DECODE ourselves using our own set of biological data. The biological data consists of images of COS-7 cells (monkey kidney tissue), which have been fixed under a microscope, such that the microtubules can be seen. We have trained the network for 120 epochs on training data that reflected our biological data using camera-specific settings and a PSF that characterizes the light circumstances of our microscopy set-up. This will train the network on simulated emitter frames and forces the network to minimize the localization error of its prediction. In Figure 3, an example input-output frame can be seen. 
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/rsangers/DECODE/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+<img src="biological_data.png" alt="biological_data" width="600"/>
 
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+This trained model can then be used to detect emitters on real data: in our case a set of .tif files that capture the light emitted by a microtubule structure over multiple time frames. If our model has been trained correctly, it has learned to localize the emitters in these frames and to combine these multiple time instances into an image that describe our biological structure. We have fitted our model on the data using the same parameters as during training combined with a PSF, and our model will then predict where the emitters are localized. This gives the image from Figure 4.
